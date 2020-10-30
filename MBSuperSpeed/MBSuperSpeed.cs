@@ -6,6 +6,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Engine.Screens;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.View.Screen;
 
 namespace MBSuperSpeed
 {
@@ -46,7 +47,7 @@ namespace MBSuperSpeed
                     return loaded;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return default;
             }
@@ -86,24 +87,30 @@ namespace MBSuperSpeed
                 return;
             }
 
-            ScreenBase topScreen = ScreenManager.TopScreen;
-
-            bool isTriggeredLockFF = topScreen != null && topScreen.DebugInput.IsControlDown() && topScreen.DebugInput.IsKeyPressed(FFLockKey);
-            bool isTriggeredFF = topScreen != null && topScreen.DebugInput.IsControlDown() && topScreen.DebugInput.IsKeyDown(FFKey);
-
-            if (isTriggeredFF != isHeldFF)
+            try
             {
-                Mission.Current.SetFastForwardingFromUI(isTriggeredFF);
-                InformationManager.DisplayMessage(new InformationMessage("Vroom = " + Mission.Current.IsFastForward, Color.FromUint(4282569842U)));
-            }
-            isHeldFF = isTriggeredFF;
+                MissionScreen? topScreen = ScreenManager.TopScreen as MissionScreen;
 
-            if (isTriggeredLockFF)
+                bool isTriggeredLockFF = topScreen != null && topScreen.InputManager.IsControlDown() && topScreen.InputManager.IsKeyPressed(FFLockKey);
+                bool isTriggeredFF = topScreen != null && topScreen.InputManager.IsControlDown() && topScreen.InputManager.IsKeyDown(FFKey);
+
+                if (isTriggeredFF != isHeldFF)
+                {
+                    Mission.Current.SetFastForwardingFromUI(isTriggeredFF);
+                    InformationManager.DisplayMessage(new InformationMessage("Vroom = " + Mission.Current.IsFastForward, Color.FromUint(4282569842U)));
+                }
+                isHeldFF = isTriggeredFF;
+
+                if (isTriggeredLockFF)
+                {
+                    Mission.Current.SetFastForwardingFromUI(!Mission.Current.IsFastForward);
+                    InformationManager.DisplayMessage(new InformationMessage("Vroom = " + Mission.Current.IsFastForward, Color.FromUint(4282569842U)));
+                }
+            }
+            catch (Exception)
             {
-                Mission.Current.SetFastForwardingFromUI(!Mission.Current.IsFastForward);
-                InformationManager.DisplayMessage(new InformationMessage("Vroom = " + Mission.Current.IsFastForward, Color.FromUint(4282569842U)));
+                // Pass
             }
-
         }
     }
 }
